@@ -1,7 +1,7 @@
 
 name: Build Oxide Launcher
 
-on:
+"on":
   workflow_dispatch:
   push:
     branches:
@@ -26,12 +26,17 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          accept-android-sdk-licenses: true
 
       - name: Install Android SDK
         run: |
-          sdkmanager "platforms;android-35" "build-tools;35.0.0"
+          sdkmanager --install \
+            "platforms;android-35" \
+            "build-tools;35.0.0" \
+            "platform-tools"
 
-      - name: Create project files
+      - name: Create Android project
         run: |
           mkdir -p app/src/main/java/com/oxide/launcher
 
@@ -60,6 +65,11 @@ jobs:
           plugins {
               id 'com.android.application' version '8.7.3' apply false
           }
+          EOF
+
+          cat > gradle.properties <<'EOF'
+          org.gradle.jvmargs=-Xmx2048m
+          android.useAndroidX=true
           EOF
 
           cat > app/build.gradle <<'EOF'
